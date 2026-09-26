@@ -41,6 +41,9 @@
   .summary strong{display:block;font-size:18px;margin-bottom:6px}
   .summary p{font-size:13px;color:#516676;line-height:1.55;margin:0}
   .footnote{margin:18px 0 0;font-size:12px;line-height:1.55;color:#67747e}
+  .quote-request{display:block;margin-top:20px;width:100%;padding:14px 18px;border-radius:9px;text-align:center;text-decoration:none;font-weight:700;font-size:15px;background:#1265a4;color:white;transition:background .15s ease}
+  .quote-request:hover{background:#0e5184}
+  .quote-request:focus-visible{outline:3px solid #84c3f5;outline-offset:3px}
   .err{color:#8c2d2d;font-weight:600}
   @media(max-width:800px){.wrap{margin:22px auto 38px;padding:0 12px}.layout{grid-template-columns:minmax(0,1fr);gap:14px}.side{padding:19px}.viewer-area{height:clamp(340px,78vw,510px)}.ar-button{bottom:15px}}
   @media(max-width:380px){.viewer-area{height:345px}.side{padding:16px}.segmented button{min-height:44px}}
@@ -113,6 +116,7 @@
         <p>A megadott kivitel a 3D nézeten szemléltető jelleggel jelenik meg.</p>
       </div>
       <p class="footnote">A méretek látványtervi megjelenítések; a falvastagság a zárt paláston nem látható. A végleges műszaki adatokat a katalógus tartalmazza.</p>
+      <a id="quote-request" class="quote-request" href="mailto:info@moltech.hu" target="_blank" rel="noopener noreferrer">Ajánlatkérés</a>
     </aside>
   </div>
   <model-viewer id="configured-ar-source" class="ar-source" alt="SERIES 3800 LIGHT – konfigurált görgő" ar ar-modes="webxr quick-look" ar-scale="fixed" loading="eager" camera-controls></model-viewer>
@@ -480,8 +484,38 @@
     if (!tube || !baseTubePositions) throw new Error('Nem található a V8 eredeti zárt palástja.');
   }
 
+  function updateQuoteLink() {
+    const materialName=materialChoice==='steel'?'Acél':'PVC';
+    const wallLabel=String(wallMm).replace('.',',');
+    const subject='Ajánlatkérés – SERIES 3800 LIGHT';
+    const body=[
+      'Tisztelt MOLTECH!',
+      '',
+      'Az alábbi görgőkonfigurációra szeretnék ajánlatot kérni:',
+      '',
+      'Termék: SERIES 3800 LIGHT',
+      'Palásthossz (L): '+lengthMm+' mm',
+      'Palást anyaga: '+materialName,
+      'Palást külső átmérője (D): '+diameterMm+' mm',
+      'Falvastagság: '+wallLabel+' mm',
+      'Tengelyátmérő (d): '+shaftMm+' mm',
+      '',
+      'Kért mennyiség (db): ',
+      'Név / cég: ',
+      'Telefonszám: ',
+      'Megjegyzés: ',
+      '',
+      'Kérem, küldjék el ajánlatukat.',
+      '',
+      'Üdvözlettel:'
+    ].join('\n');
+    document.getElementById('quote-request').href=
+      'mailto:info@moltech.hu?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+  }
+
   function updateConfiguration(resetView=false) {
     syncAllowedChoices();
+    updateQuoteLink();
     document.getElementById('summary-name').textContent=lengthMm+' mm · '+(materialChoice==='steel'?'Acél':'PVC')+' · Ø'+diameterMm+' × '+String(wallMm).replace('.',',')+' · d'+shaftMm;
     document.getElementById('steel').setAttribute('aria-pressed',String(materialChoice==='steel'));
     document.getElementById('pvc').setAttribute('aria-pressed',String(materialChoice==='pvc'));
