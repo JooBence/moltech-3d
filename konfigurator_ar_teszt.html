@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>SERIES 3800 LIGHT | 3D konfigurátor + AR</title>
+<!-- MOLTECH konfigurátor: V8 eredeti, egy darabból álló zárt palástjának hosszváltoztatásával. -->
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js"></script>
+<style>
+  *{box-sizing:border-box}
+  :root{font-family:Arial,Helvetica,sans-serif;color:#192632;background:#f3f5f7}
+  body{margin:0}
+  .wrap{max-width:1220px;margin:28px auto 60px;padding:0 18px}
+  h1{font-size:clamp(26px,4vw,40px);line-height:1.14;margin:9px 0 10px;letter-spacing:.15px}
+  .lead{color:#667581;line-height:1.6;margin:0 0 21px}
+  .layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,.82fr);gap:18px;align-items:start}
+  .card{border-radius:15px;background:#fff;box-shadow:0 6px 28px #1b273318;overflow:hidden}
+  .viewer-area{height:clamp(360px,58vw,620px);position:relative;background:radial-gradient(circle at 52% 40%,#ffffff 7%,#e9eef2 94%)}
+  #scene{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+  .loading{position:absolute;inset:0;display:flex;justify-content:center;align-items:center;background:#f0f3f6dc;color:#475b6d;padding:22px;text-align:center;line-height:1.5;font-weight:600}
+  .loading[hidden]{display:none}
+  .ar-button{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);white-space:nowrap;background:#1265a4;color:#fff;border:0;border-radius:9px;padding:13px 18px;font-weight:700;font-size:14px;cursor:pointer;z-index:3}
+  .ar-button:disabled{opacity:.68;cursor:wait}
+  .ar-button:focus-visible{outline:3px solid #84c3f5;outline-offset:3px}
+  /* Hidden pre-loaded model-viewer for exporting the CURRENT selection to iPhone AR. */
+  .ar-source{position:fixed;left:0;top:0;width:2px;height:2px;opacity:0;pointer-events:none;z-index:-1}
+  .side{padding:22px}
+  .side h2{font-size:19px;margin:0 0 7px}
+  .side .sub{font-size:13px;color:#65727d;line-height:1.5;margin:0 0 22px}
+  .field{margin:0 0 20px}
+  label{font-weight:700;font-size:14px;display:block;margin:0 0 9px}
+  select{width:100%;border:1px solid #cad5dc;border-radius:9px;background:#fff;color:#1f2c39;padding:12px 13px;font:inherit;cursor:pointer}
+  select:focus-visible,.segmented button:focus-visible,a:focus-visible{outline:3px solid #84c3f5;outline-offset:2px}
+  .segmented{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .segmented button{border:1px solid #d0dce5;border-radius:9px;padding:12px 9px;background:#fff;cursor:pointer;font-size:14px;color:#344857;font-weight:bold}
+  select option:disabled{color:#8c9aa5}
+  .segmented button[aria-pressed="true"]{border:2px solid #1469aa;background:#eaf5ff;color:#125d97;padding:11px 8px}
+  .summary{background:#f0f6fa;border:1px solid #d9e7f0;border-radius:11px;padding:16px;margin-top:24px}
+  .summary-title{font-size:11px;font-weight:800;letter-spacing:1px;color:#407193;margin:0 0 10px}
+  .summary strong{display:block;font-size:18px;margin-bottom:6px}
+  .summary p{font-size:13px;color:#516676;line-height:1.55;margin:0}
+  .footnote{margin:18px 0 0;font-size:12px;line-height:1.55;color:#67747e}
+  .err{color:#8c2d2d;font-weight:600}
+  @media(max-width:800px){.wrap{margin:22px auto 38px;padding:0 12px}.layout{grid-template-columns:minmax(0,1fr);gap:14px}.side{padding:19px}.viewer-area{height:clamp(340px,78vw,510px)}.ar-button{bottom:15px}}
+  @media(max-width:380px){.viewer-area{height:345px}.side{padding:16px}.segmented button{min-height:44px}}
+
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>SERIES 3800 LIGHT</h1>
+  <p class="lead">Forgasd el, nagyíts rá, és válaszd ki a görgő kívánt kivitelét.</p>
+  <div class="layout">
+    <section class="card" aria-label="Interaktív görgőmodell">
+      <div class="viewer-area" id="viewer-area">
+        <canvas id="scene" aria-label="Forgatható, nagyítható 3D görgő"></canvas>
+        <div class="loading" id="loading" role="status">A 3D modell betöltése…</div>
+        <button class="ar-button" id="ar-button" type="button" disabled>Megtekintés AR-ben</button>
+      </div>
+    </section>
+    <aside class="card side" aria-label="Görgő konfigurálása">
+      <h2>Konfiguráció</h2>
+      <p class="sub">Válaszd ki a kívánt kivitelt; a 3D megjelenítés automatikusan frissül.</p>
+      <div class="field">
+        <label for="hossz">Palásthossz (L)</label>
+        <select id="hossz">
+          <option value="100">100 mm</option>
+          <option value="300" selected>300 mm</option>
+          <option value="500">500 mm</option>
+          <option value="800">800 mm</option>
+          <option value="1000">1000 mm</option>
+          <option value="1500">1500 mm</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Palást anyaga</label>
+        <div class="segmented" role="group" aria-label="Palást anyaga">
+          <button type="button" id="steel" aria-pressed="true">Acél</button>
+          <button type="button" id="pvc" aria-pressed="false">PVC</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="atmero">Palást külső átmérője (D)</label>
+        <select id="atmero">
+          <option value="50">50 mm</option>
+          <option value="60" selected>60 mm</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="falvastagsag">Falvastagság</label>
+        <select id="falvastagsag"><option value="1.5">1,5 mm</option></select>
+      </div>
+      <div class="field">
+        <label for="tengely">Tengelyátmérő (d)</label>
+        <select id="tengely">
+          <option value="8">8 mm</option>
+          <option value="10">10 mm</option>
+          <option value="12" selected>12 mm</option>
+        </select>
+      </div>
+      <div class="summary" aria-live="polite">
+        <p class="summary-title">VÁLASZTOTT KONFIGURÁCIÓ</p>
+        <strong id="summary-name">300 mm · Acél · Ø60 × 1,5 · d12</strong>
+        <p>A megadott kivitel a 3D nézeten szemléltető jelleggel jelenik meg.</p>
+      </div>
+      <p class="footnote">A méretek látványtervi megjelenítések; a falvastagság a zárt paláston nem látható. A végleges műszaki adatokat a katalógus tartalmazza.</p>
+    </aside>
+  </div>
+  <model-viewer id="configured-ar-source" class="ar-source" alt="SERIES 3800 LIGHT – konfigurált görgő" ar ar-modes="webxr quick-look" ar-scale="fixed" loading="eager" camera-controls></model-viewer>
+</main>
+<script type="module">
+  import * as THREE from 'three';
+  import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+  import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
+
+  const SOURCE = './MOLTECH_3800_LIGHT_AR_v8.glb';
+  // A V8 teljes modellje alapállapotban 300 mm. Az eredeti palást csúcspontjai
+  // a két végén külön keresztmetszeteket alkotnak; a hátsó keresztmetszeteket
+  // együtt mozgatjuk a végződéssel, így a zárt palást és a csatlakozás megmarad.
+  const BASE_MODEL_M = 0.300;
+  const REAR_JOIN_OVERLAP_M = 0.0025; // 2,5 mm belső ráfedés a hátsó vég csatlakozásánál
+  const REAR_VERTEX_THRESHOLD_Z = 0.10;
+  const REAR_CAP_FACE_THRESHOLD_Z = 0.12;
+  let lengthMm = 300;
+  let materialChoice = 'steel';
+  let diameterMm = 60;
+  let wallMm = 1.5;
+  let shaftMm = 12;
+  // A V8 alapmodell palástátmérője a GLB-ben kb. 57,888 mm.
+  const BASE_TUBE_DIAMETER_M = 0.05788835;
+  // Az eredeti kiálló tengelyvégek sugara a V8-ban kb. 7,3 mm.
+  const BASE_SHAFT_RADIUS_M = 0.0073;
+  const CATALOG_LENGTHS = [100,300,500,800,1000,1500];
+  const GEOMETRIES = {
+    steel: {50:[1.5],60:[1.5,2.0]},
+    pvc:   {50:[2.8]}
+  };
+  let shaftMeshes = [];
+  let rearPieces = [];
+  let driveBluePieces = [];
+  let ready = false;
+  let driveEnd, otherEnd, tube, baseTubePositions;
+
+  const arViewer=document.getElementById('configured-ar-source');
+  const arButton=document.getElementById('ar-button');
+  let arRevision=0;
+  let arTimer=null;
+  let arReady=false;
+  let arObjectURL=null;
+  let arLoadHandler=null;
+  let arErrorHandler=null;
+  const arExporter=new GLTFExporter();
+  function showARState(state) {
+    arReady=(state==='ready');
+    arButton.disabled=!arReady;
+    arButton.textContent=state==='ready' ? 'Megtekintés AR-ben' :
+      state==='error' ? 'AR nem érhető el' : 'AR előkészítése…';
+  }
+
+  // Export in advance on selection changes: the AR-opening click itself stays
+  // a direct user gesture, required by native iPhone Quick Look.
+  function scheduleARExport() {
+    if(!ready) return;
+    const revision=++arRevision;
+    clearTimeout(arTimer);
+    showARState('loading');
+    arTimer=setTimeout(async()=>{
+      let nextURL=null;
+      try {
+        // Export exactly the visible geometry/materials, including all dimensions
+        // and the 2.5 mm rear overlap. No new model variant stored on GitHub.
+        assembly.updateMatrixWorld(true);
+        const currentModel=assembly.clone(true);
+        const exportScene=new THREE.Scene();
+        exportScene.add(currentModel);
+        const binary=await arExporter.parseAsync(exportScene,{
+          binary:true,
+          onlyVisible:true,
+          trs:false,
+          maxTextureSize:2048
+        });
+        if(revision!==arRevision) return; // a newer selection superseded this
+        nextURL=URL.createObjectURL(new Blob([binary],{type:'model/gltf-binary'}));
+        if(arLoadHandler) arViewer.removeEventListener('load',arLoadHandler);
+        if(arErrorHandler) arViewer.removeEventListener('error',arErrorHandler);
+        const previousURL=arObjectURL;
+        arLoadHandler=()=>{
+          if(revision!==arRevision || arViewer.src!==nextURL) return;
+          if(previousURL) URL.revokeObjectURL(previousURL);
+          arObjectURL=nextURL;
+          showARState('ready');
+        };
+        arErrorHandler=()=>{
+          if(revision!==arRevision || arViewer.src!==nextURL) return;
+          URL.revokeObjectURL(nextURL);
+          showARState('error');
+        };
+        arViewer.addEventListener('load',arLoadHandler);
+        arViewer.addEventListener('error',arErrorHandler);
+        arViewer.src=nextURL;
+      } catch(error) {
+        if(nextURL) URL.revokeObjectURL(nextURL);
+        if(revision===arRevision) showARState('error');
+        console.error('A konfigurált AR-modell előkészítése sikertelen:',error);
+      }
+    },180);
+  }
+
+  arButton.addEventListener('click',()=>{
+    // No fallback to the V8: never pretend to show a chosen configuration
+    // while silently displaying the original demo model.
+    if(!arReady) return;
+    if(arViewer.canActivateAR && typeof arViewer.activateAR==='function') {
+      arViewer.activateAR().catch(error=>{
+        console.error('A telefon nem tudta megnyitni az AR-t:',error);
+        alert('Az AR nem nyitható meg ebben a böngészőben. iPhone-on próbáld Safari böngészőben.');
+      });
+    } else {
+      alert('Ezen a készüléken az AR nem támogatott. iPhone-on próbáld Safari böngészőben.');
+    }
+  });
+
+  const canvas = document.getElementById('scene');
+  const area = document.getElementById('viewer-area');
+  const loading = document.getElementById('loading');
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.35;
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(36, 1, 0.005, 30);
+  const controls = new OrbitControls(camera, canvas);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.enablePan = false;
+  controls.minDistance = 0.12;
+  controls.maxDistance = 6;
+  controls.target.set(0,0,0);
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xa7b6c2, 2.3));
+  const key = new THREE.DirectionalLight(0xffffff, 3.1);
+  key.position.set(-2,3,5);
+  scene.add(key);
+  const fill = new THREE.DirectionalLight(0xffffff, 1.3);
+  fill.position.set(2,1,-4);
+  scene.add(fill);
+
+  const assembly = new THREE.Group();
+  // A STEP/GLB eredeti tengelye Z; vízszintes, bal oldalt hajtásos nézetet adunk.
+  assembly.rotation.y = Math.PI / 2;
+  scene.add(assembly);
+  driveEnd = new THREE.Group();
+  otherEnd = new THREE.Group();
+  assembly.add(driveEnd, otherEnd);
+
+  const steelMaterial = new THREE.MeshStandardMaterial({
+    name:'Konfigurator - acel palast', color:0xb8bec3,
+    metalness:0.76, roughness:0.31, side:THREE.DoubleSide
+  });
+  const pvcMaterial = new THREE.MeshStandardMaterial({
+    name:'Konfigurator - PVC palast', color:0x168ad7,
+    metalness:0.02, roughness:0.72, side:THREE.DoubleSide
+  });
+
+  function sizeRenderer() {
+    const w=Math.max(1,area.clientWidth);
+    const h=Math.max(1,area.clientHeight);
+    renderer.setSize(w,h,false);
+    camera.aspect=w/h;
+    camera.updateProjectionMatrix();
+  }
+
+  function focusDriveEnd() {
+    const fullM=lengthMm/1000;
+    const distance=Math.max(0.61, fullM*1.50);
+    camera.position.set(-0.70*distance, 0.33*distance, 0.78*distance);
+    controls.target.set(0,0,0);
+    controls.update();
+  }
+
+  // Face-alapú, de a geometriát nem átrajzoló szétválasztás: a V8 eredeti
+  // háromszögeit osztjuk a hajtásoldali és a másik végi alkatrészek közé.
+  // Az alkatrész-geometriát nem nyújtjuk meg; csak a két vég távolsága változik.
+  function selectSideGeometry(geometry, side) {
+    const converted = Boolean(geometry.index);
+    const src = converted ? geometry.toNonIndexed() : geometry;
+    const p = src.getAttribute('position');
+    const chosen=[];
+    for(let i=0;i<p.count;i+=3) {
+      const z=(p.getZ(i)+p.getZ(i+1)+p.getZ(i+2))/3;
+      if ((side==='drive' && z<0) || (side==='other' && z>=0)) {
+        chosen.push(i,i+1,i+2);
+      }
+    }
+    if (!chosen.length) {
+      if(converted) src.dispose();
+      return null;
+    }
+    const result = new THREE.BufferGeometry();
+    for (const [name, attribute] of Object.entries(src.attributes)) {
+      const n=attribute.itemSize;
+      const data=new Float32Array(chosen.length*n);
+      let at=0;
+      for(const vertex of chosen){
+        for(let component=0;component<n;component++){
+          data[at++]=attribute.getComponent(vertex,component);
+        }
+      }
+      result.setAttribute(name,new THREE.BufferAttribute(data,n));
+    }
+    result.computeBoundingBox();
+    result.computeBoundingSphere();
+    if(converted) src.dispose();
+    return result;
+  }
+
+  // Az ezüst eredeti alkatrész részein kizárólag a két kiálló tengelyvéget
+  // módosítjuk. A csapágy és a kék/fekete hajtáselemek nem skálázódnak.
+  function deformShaftEnds() {
+    const ratio=(shaftMm/2000)/BASE_SHAFT_RADIUS_M;
+    for(const item of shaftMeshes) {
+      const position=item.mesh.geometry.getAttribute('position');
+      const original=item.original;
+      for(let i=0;i<position.count;i++) {
+        const j=3*i, x=original[j], y=original[j+1], z=original[j+2];
+        const r=Math.hypot(x,y);
+        let weight=0;
+        if(r<0.0105) {
+          if(item.side==='drive') weight=Math.max(0,Math.min(1,(-z-0.1398)/0.0034));
+          else weight=Math.max(0,Math.min(1,(z-0.1398)/0.0034));
+        }
+        const f=1+(ratio-1)*weight;
+        if(r>0.016) {
+          // A palástvégi ezüst perem mindkét oldalon kövesse az 50/60 mm-es palástátmérőt.
+          const baseR=BASE_TUBE_DIAMETER_M/2, targetR=diameterMm/2000;
+          const newR=0.016+(r-0.016)*(targetR-0.016)/(baseR-0.016);
+          const rimScale=newR/r;
+          position.array[j]=x*rimScale;
+          position.array[j+1]=y*rimScale;
+        } else {
+          position.array[j]=x*f;
+          position.array[j+1]=y*f;
+        }
+        position.array[j+2]=z;
+      }
+      position.needsUpdate=true;
+      item.mesh.geometry.computeBoundingBox();
+      item.mesh.geometry.computeBoundingSphere();
+    }
+  }
+
+  function adaptRearOuterRim() {
+    // A hátsó külső perem külső sugara követi a palást D=50/60 választást,
+    // miközben a tengely és a belső színes tárcsa eredeti mérete megmarad.
+    const baseR=BASE_TUBE_DIAMETER_M/2, targetR=diameterMm/2000, anchorR=0.016;
+    const outerFactor=(targetR-anchorR)/(baseR-anchorR);
+    for(const item of rearPieces) {
+      const p=item.mesh.geometry.getAttribute('position'), original=item.original;
+      for(let i=0;i<p.count;i++) {
+        const j=3*i, x=original[j],y=original[j+1],r=Math.hypot(x,y);
+        const newR=r>anchorR ? anchorR+(r-anchorR)*outerFactor : r;
+        const f=r>0?newR/r:1;
+        p.array[j]=x*f;p.array[j+1]=y*f;p.array[j+2]=original[j+2];
+      }
+      p.needsUpdate=true;
+      item.mesh.geometry.computeBoundingBox();
+      item.mesh.geometry.computeBoundingSphere();
+    }
+  }
+
+  function adaptDriveBlueFill() {
+    // A hajtásoldali kék tárcsa középső nyílása kövesse a tengelyátmérőt,
+    // hogy kisebb d esetén se maradjon átlátszó gyűrű a tengely körül.
+    const targetR=Math.max(shaftMm/2000 + 0.00035, 0.0045);
+    const blendOuterR=0.0110;
+    for(const item of driveBluePieces) {
+      const p=item.mesh.geometry.getAttribute('position'), original=item.original;
+      for(let i=0;i<p.count;i++) {
+        const j=3*i, x=original[j], y=original[j+1], r=Math.hypot(x,y);
+        let newR=r;
+        if(r<blendOuterR) {
+          const t=Math.max(0, Math.min(1, (blendOuterR-r)/(blendOuterR-0.0073)));
+          newR=targetR + (r-0.0073)*(1-t) + (r-targetR)*t*0.15;
+          newR=Math.max(targetR, newR);
+        }
+        const f=r>0 ? newR/r : 1;
+        p.array[j]=x*f;
+        p.array[j+1]=y*f;
+        p.array[j+2]=original[j+2];
+      }
+      p.needsUpdate=true;
+      item.mesh.geometry.computeBoundingBox();
+      item.mesh.geometry.computeBoundingSphere();
+    }
+  }
+
+  function syncAllowedChoices() {
+    // A katalógusban PVC csak 50 × 2,8 mm és L <= 500 mm.
+    const allowableDiameters=Object.keys(GEOMETRIES[materialChoice]).map(Number);
+    const diameterSelect=document.getElementById('atmero');
+    for(const option of diameterSelect.options) option.disabled=!allowableDiameters.includes(Number(option.value));
+    if(!allowableDiameters.includes(diameterMm)) diameterMm=allowableDiameters[0];
+    diameterSelect.value=String(diameterMm);
+    const wallOptions=GEOMETRIES[materialChoice][diameterMm];
+    if(!wallOptions.includes(wallMm))wallMm=wallOptions[0];
+    const wallSelect=document.getElementById('falvastagsag');
+    wallSelect.replaceChildren(...wallOptions.map(v=>{
+      const option=document.createElement('option');
+      option.value=String(v);option.textContent=String(v).replace('.',',')+' mm';
+      return option;
+    }));
+    wallSelect.value=String(wallMm);
+    const select=document.getElementById('hossz');
+    for(const option of select.options)option.disabled=materialChoice==='pvc'&&Number(option.value)>500;
+    if(materialChoice==='pvc'&&lengthMm>500)lengthMm=500;
+    select.value=String(lengthMm);
+    document.getElementById('tengely').value=String(shaftMm);
+  }
+
+  function makeEndPieces(original) {
+    original.traverse(object => {
+      if (!object.isMesh) return;
+
+      if (object.name === 'Palast__zart_belso_test') {
+        // NEM alkotunk új hengert: megtartjuk a V8 eredeti, összefüggő,
+        // zárt csőgeometriáját és annak eredeti hátsó lezárását is.
+        const geometry = object.geometry.index
+          ? object.geometry.toNonIndexed() : object.geometry.clone();
+        const source = geometry.getAttribute('position');
+        baseTubePositions = new Float32Array(source.array);
+
+        // A hátsó ezüst lezárás színe anyagváltáskor se változzon kékre.
+        // A hosszú palást háromszögei 0-s, a hátsó lezáráséi 1-es csoportba kerülnek.
+        geometry.clearGroups();
+        for (let i=0; i<source.count; i+=3) {
+          const minZ=Math.min(source.getZ(i),source.getZ(i+1),source.getZ(i+2));
+          const materialIndex=minZ>REAR_CAP_FACE_THRESHOLD_Z ? 1 : 0;
+          geometry.addGroup(i,3,materialIndex);
+        }
+        const rearMaterial=Array.isArray(object.material)
+          ? object.material[0].clone() : object.material.clone();
+        rearMaterial.side=THREE.DoubleSide;
+        rearMaterial.transparent=false;
+        rearMaterial.depthWrite=true;
+        tube=new THREE.Mesh(geometry,[steelMaterial,rearMaterial]);
+        tube.name='V8_eredeti_zart_valtoztathato_palast';
+        tube.frustumCulled=false;
+        assembly.add(tube);
+        return;
+      }
+
+      // Az eredeti STEP-ből származó végeket változatlan alakban őrizzük meg.
+      for (const [side,group] of [['drive',driveEnd],['other',otherEnd]]) {
+        const geometry=selectSideGeometry(object.geometry,side);
+        if (!geometry) continue;
+        const material=Array.isArray(object.material)
+          ? object.material.map(m=>m.clone()) : object.material.clone();
+        const child=new THREE.Mesh(geometry,material);
+        child.name=object.name+'_'+side;
+        if (Array.isArray(child.material)) child.material.forEach(m=>m.side=THREE.DoubleSide);
+        else child.material.side=THREE.DoubleSide;
+        child.frustumCulled=false;
+        if(side==='other') rearPieces.push({mesh:child, original:new Float32Array(geometry.getAttribute('position').array)});
+        if(side==='drive' && object.name==='Kek__frikcios_tarcsa') driveBluePieces.push({mesh:child, original:new Float32Array(geometry.getAttribute('position').array)});
+        if(object.name==='silver_original') shaftMeshes.push({mesh:child, side, original:new Float32Array(geometry.getAttribute('position').array)});
+        group.add(child);
+      }
+    });
+    if (!tube || !baseTubePositions) throw new Error('Nem található a V8 eredeti zárt palástja.');
+  }
+
+  function updateConfiguration(resetView=false) {
+    syncAllowedChoices();
+    document.getElementById('summary-name').textContent=lengthMm+' mm · '+(materialChoice==='steel'?'Acél':'PVC')+' · Ø'+diameterMm+' × '+String(wallMm).replace('.',',')+' · d'+shaftMm;
+    document.getElementById('steel').setAttribute('aria-pressed',String(materialChoice==='steel'));
+    document.getElementById('pvc').setAttribute('aria-pressed',String(materialChoice==='pvc'));
+    if (!ready) return;
+
+    const extra=lengthMm/1000-BASE_MODEL_M;
+    driveEnd.position.z=0;
+    otherEnd.position.z=extra-REAR_JOIN_OVERLAP_M;
+    // A teljes görgőt középen tartjuk a kamera előtt, hosszabb változatnál is.
+    assembly.position.x=-extra/2;
+
+    const position=tube.geometry.getAttribute('position');
+    for (let i=0;i<position.count;i++) {
+      const j=3*i;
+      const radialFactor=(diameterMm/1000)/BASE_TUBE_DIAMETER_M;
+      position.array[j]=baseTubePositions[j]*radialFactor;
+      position.array[j+1]=baseTubePositions[j+1]*radialFactor;
+      const z=baseTubePositions[j+2];
+      position.array[j+2]=z+(z>REAR_VERTEX_THRESHOLD_Z ? extra : 0);
+    }
+    position.needsUpdate=true;
+    tube.geometry.computeBoundingBox();
+    tube.geometry.computeBoundingSphere();
+    // Az eredeti normálok megmaradnak: csak a hosszú egyenes szakasz nyúlik.
+    tube.material[0]=(materialChoice==='steel'?steelMaterial:pvcMaterial);
+    adaptRearOuterRim();
+    deformShaftEnds();
+    adaptDriveBlueFill();
+    scheduleARExport();
+    if (resetView) focusDriveEnd();
+  }
+
+  document.getElementById('hossz').addEventListener('change',e=>{
+    lengthMm=Number(e.target.value);
+    updateConfiguration(true);
+  });
+  document.getElementById('steel').addEventListener('click',()=>{
+    materialChoice='steel';updateConfiguration();
+  });
+  document.getElementById('pvc').addEventListener('click',()=>{
+    materialChoice='pvc';updateConfiguration(true);
+  });
+  document.getElementById('atmero').addEventListener('change', e=>{
+    diameterMm=Number(e.target.value); updateConfiguration();
+  });
+  document.getElementById('falvastagsag').addEventListener('change', e=>{
+    wallMm=Number(e.target.value); updateConfiguration();
+  });
+  document.getElementById('tengely').addEventListener('change', e=>{
+    shaftMm=Number(e.target.value); updateConfiguration();
+  });
+
+  syncAllowedChoices();
+  sizeRenderer();
+  if(window.ResizeObserver) new ResizeObserver(sizeRenderer).observe(area);
+  else window.addEventListener('resize',sizeRenderer);
+
+  const loader=new GLTFLoader();
+  loader.load(SOURCE, gltf=>{
+    try {
+      makeEndPieces(gltf.scene);
+      ready=true;
+      updateConfiguration(true);
+      loading.hidden=true;
+    } catch(error) {
+      loading.classList.add('err');
+      loading.textContent='A konfigurátor nem tudta feldolgozni a V8-at: '+error.message;
+      console.error(error);
+    }
+  },undefined,error=>{
+    loading.classList.add('err');
+    loading.textContent='A V8-as GLB nem tölthető be. Ellenőrizd, hogy a konfigurator.html mellett a GitHubon megtalálható-e a MOLTECH_3800_LIGHT_AR_v8.glb fájl.';
+    console.error(error);
+  });
+
+  function animate(){
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene,camera);
+  }
+  animate();
+</script>
+</body>
+</html>
