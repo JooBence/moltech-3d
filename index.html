@@ -107,24 +107,26 @@ button{
 
   <section class="panel">
 
-    <model-viewer
-      src="./MOLTECH_3800_LIGHT_AR_v7.glb"
-      alt="Series 3800 Light görgő háromdimenziós modellje"
-      camera-controls
-      touch-action="pan-y"
-      auto-rotate
-      shadow-intensity="0.5"
-      exposure="1"
-      ar
-      ar-modes="webxr scene-viewer quick-look"
-      ar-scale="fixed"
-      interaction-prompt="auto">
 
-      <button class="ar" slot="ar-button">
-        Megtekintés AR-ben
-      </button>
+<model-viewer
+  src="./MOLTECH_3800_LIGHT_AR_v8.glb"
+  alt="Series 3800 Light görgő háromdimenziós modellje"
+  camera-controls
+  camera-orbit="145deg 75deg auto"
+  touch-action="pan-y"
+  shadow-intensity="0.5"
+  exposure="1"
+  ar
+  ar-modes="webxr scene-viewer quick-look"
+  ar-scale="fixed"
+  interaction-prompt="auto">
 
-    </model-viewer>
+  <button class="ar" slot="ar-button">
+    Megtekintés AR-ben
+  </button>
+
+</model-viewer>
+
 
     <div class="foot">
 
