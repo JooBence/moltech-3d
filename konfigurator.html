@@ -156,6 +156,7 @@
   };
   let shaftMeshes = [];
   let rearPieces = [];
+  let driveBluePieces = [];
   let ready = false;
   let driveEnd, otherEnd, tube, baseTubePositions;
 
@@ -270,8 +271,8 @@
           else weight=Math.max(0,Math.min(1,(z-0.1398)/0.0034));
         }
         const f=1+(ratio-1)*weight;
-        if(item.side==='other' && r>0.016) {
-          // A külső gyűrű átmérőkövetése a tengelykezelés után is megmarad.
+        if(r>0.016) {
+          // A palástvégi ezüst perem mindkét oldalon kövesse az 50/60 mm-es palástátmérőt.
           const baseR=BASE_TUBE_DIAMETER_M/2, targetR=diameterMm/2000;
           const newR=0.016+(r-0.016)*(targetR-0.016)/(baseR-0.016);
           const rimScale=newR/r;
@@ -301,6 +302,32 @@
         const newR=r>anchorR ? anchorR+(r-anchorR)*outerFactor : r;
         const f=r>0?newR/r:1;
         p.array[j]=x*f;p.array[j+1]=y*f;p.array[j+2]=original[j+2];
+      }
+      p.needsUpdate=true;
+      item.mesh.geometry.computeBoundingBox();
+      item.mesh.geometry.computeBoundingSphere();
+    }
+  }
+
+  function adaptDriveBlueFill() {
+    // A hajtásoldali kék tárcsa középső nyílása kövesse a tengelyátmérőt,
+    // hogy kisebb d esetén se maradjon átlátszó gyűrű a tengely körül.
+    const targetR=Math.max(shaftMm/2000 + 0.00035, 0.0045);
+    const blendOuterR=0.0110;
+    for(const item of driveBluePieces) {
+      const p=item.mesh.geometry.getAttribute('position'), original=item.original;
+      for(let i=0;i<p.count;i++) {
+        const j=3*i, x=original[j], y=original[j+1], r=Math.hypot(x,y);
+        let newR=r;
+        if(r<blendOuterR) {
+          const t=Math.max(0, Math.min(1, (blendOuterR-r)/(blendOuterR-0.0073)));
+          newR=targetR + (r-0.0073)*(1-t) + (r-targetR)*t*0.15;
+          newR=Math.max(targetR, newR);
+        }
+        const f=r>0 ? newR/r : 1;
+        p.array[j]=x*f;
+        p.array[j+1]=y*f;
+        p.array[j+2]=original[j+2];
       }
       p.needsUpdate=true;
       item.mesh.geometry.computeBoundingBox();
@@ -375,6 +402,7 @@
         else child.material.side=THREE.DoubleSide;
         child.frustumCulled=false;
         if(side==='other') rearPieces.push({mesh:child, original:new Float32Array(geometry.getAttribute('position').array)});
+        if(side==='drive' && object.name==='Kek__frikcios_tarcsa') driveBluePieces.push({mesh:child, original:new Float32Array(geometry.getAttribute('position').array)});
         if(object.name==='silver_original') shaftMeshes.push({mesh:child, side, original:new Float32Array(geometry.getAttribute('position').array)});
         group.add(child);
       }
@@ -411,6 +439,7 @@
     tube.material[0]=(materialChoice==='steel'?steelMaterial:pvcMaterial);
     adaptRearOuterRim();
     deformShaftEnds();
+    adaptDriveBlueFill();
     if (resetView) focusDriveEnd();
   }
 
