@@ -275,7 +275,7 @@
 
     const extra=lengthMm/1000-BASE_MODEL_M;
     driveEnd.position.z=0;
-    otherEnd.position.z=extra;
+    otherEnd.position.z=extra-REAR_JOIN_OVERLAP_M;
     // A teljes görgőt középen tartjuk a kamera előtt, hosszabb változatnál is.
     assembly.position.x=-extra/2;
 
