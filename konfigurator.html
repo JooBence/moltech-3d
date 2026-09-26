@@ -93,7 +93,7 @@
       <p class="footnote">A 3D nézet szemléltető jellegű; a végleges műszaki adatokat a katalógus tartalmazza.</p>
     </aside>
   </div>
-  <model-viewer id="v8-ar-source" class="ar-source" src="./MOLTECH_3800_LIGHT_AR_v8_HATSO_JAVITAS.glb" alt="SERIES 3800 LIGHT – V8 bemutatómodell" ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" loading="eager" camera-controls></model-viewer>
+  <model-viewer id="v8-ar-source" class="ar-source" src="./MOLTECH_3800_LIGHT_AR_v8.glb" alt="SERIES 3800 LIGHT – V8 bemutatómodell" ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" loading="eager" camera-controls></model-viewer>
 </main>
 <script>
   // Directly open the verified V8 in mobile AR; fall back to its working page.
@@ -111,7 +111,7 @@
   import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
   import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-  const SOURCE = './MOLTECH_3800_LIGHT_AR_v8_HATSO_JAVITAS.glb';
+  const SOURCE = './MOLTECH_3800_LIGHT_AR_v8.glb';
   // A V8 két végződése között a rekonstruált, egyenes palást csatlakozási
   // síkjai közel -0.110 m és +0.130 m. Csak ezt a középső szakaszt méretezzük.
   const BASE_TUBE_M = 0.240;
@@ -289,7 +289,7 @@
     }
   },undefined,error=>{
     loading.classList.add('err');
-    loading.textContent='A V8-as GLB nem tölthető be. Ellenőrizd, hogy a konfigurator.html mellett a GitHubon megtalálható-e a MOLTECH_3800_LIGHT_AR_v8_HATSO_JAVITAS.glb fájl.';
+    loading.textContent='A V8-as GLB nem tölthető be. Ellenőrizd, hogy a konfigurator.html mellett a GitHubon megtalálható-e a MOLTECH_3800_LIGHT_AR_v8.glb fájl.';
     console.error(error);
   });
 
