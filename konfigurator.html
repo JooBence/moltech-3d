@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>SERIES 3800 LIGHT | 3D konfigurátor</title>
+<!-- MOLTECH KONFIGURÁTOR: jóváhagyott elrendezés, kék PVC, V8 AR. 2026-09-26 -->
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js"></script>
+<style>
+  *{box-sizing:border-box}
+  :root{font-family:Arial,Helvetica,sans-serif;color:#192632;background:#f3f5f7}
+  body{margin:0}
+  .wrap{max-width:1220px;margin:28px auto 60px;padding:0 18px}
+  h1{font-size:clamp(26px,4vw,40px);line-height:1.14;margin:9px 0 10px;letter-spacing:.15px}
+  .lead{color:#667581;line-height:1.6;margin:0 0 21px}
+  .layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,.82fr);gap:18px;align-items:start}
+  .card{border-radius:15px;background:#fff;box-shadow:0 6px 28px #1b273318;overflow:hidden}
+  .viewer-area{height:clamp(360px,58vw,620px);position:relative;background:radial-gradient(circle at 52% 40%,#ffffff 7%,#e9eef2 94%)}
+  #scene{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+  .loading{position:absolute;inset:0;display:flex;justify-content:center;align-items:center;background:#f0f3f6dc;color:#475b6d;padding:22px;text-align:center;line-height:1.5;font-weight:600}
+  .loading[hidden]{display:none}
+  .ar-button{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);white-space:nowrap;background:#1265a4;color:#fff;border:0;border-radius:9px;padding:13px 18px;font-weight:700;font-size:14px;cursor:pointer;z-index:3}
+  .ar-button:focus-visible{outline:3px solid #84c3f5;outline-offset:3px}
+  /* The AR source remains present in the document so Quick Look can use it. */
+  .ar-source{position:fixed;left:0;top:0;width:2px;height:2px;opacity:0;pointer-events:none;z-index:-1}
+  .side{padding:22px}
+  .side h2{font-size:19px;margin:0 0 7px}
+  .side .sub{font-size:13px;color:#65727d;line-height:1.5;margin:0 0 22px}
+  .field{margin:0 0 20px}
+  label{font-weight:700;font-size:14px;display:block;margin:0 0 9px}
+  select{width:100%;border:1px solid #cad5dc;border-radius:9px;background:#fff;color:#1f2c39;padding:12px 13px;font:inherit;cursor:pointer}
+  select:focus-visible,.segmented button:focus-visible,a:focus-visible{outline:3px solid #84c3f5;outline-offset:2px}
+  .segmented{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .segmented button{border:1px solid #d0dce5;border-radius:9px;padding:12px 9px;background:#fff;cursor:pointer;font-size:14px;color:#344857;font-weight:bold}
+  .segmented button[aria-pressed="true"]{border:2px solid #1469aa;background:#eaf5ff;color:#125d97;padding:11px 8px}
+  .summary{background:#f0f6fa;border:1px solid #d9e7f0;border-radius:11px;padding:16px;margin-top:24px}
+  .summary-title{font-size:11px;font-weight:800;letter-spacing:1px;color:#407193;margin:0 0 10px}
+  .summary strong{display:block;font-size:18px;margin-bottom:6px}
+  .summary p{font-size:13px;color:#516676;line-height:1.55;margin:0}
+  .footnote{margin:18px 0 0;font-size:12px;line-height:1.55;color:#67747e}
+  .err{color:#8c2d2d;font-weight:600}
+  @media(max-width:800px){.wrap{margin:22px auto 38px;padding:0 12px}.layout{grid-template-columns:minmax(0,1fr);gap:14px}.side{padding:19px}.viewer-area{height:clamp(340px,78vw,510px)}.ar-button{bottom:15px}}
+  @media(max-width:380px){.viewer-area{height:345px}.side{padding:16px}.segmented button{min-height:44px}}
+
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>SERIES 3800 LIGHT</h1>
+  <p class="lead">Forgasd el, nagyíts rá, és válaszd ki a görgő hosszát és a palást anyagát.</p>
+  <div class="layout">
+    <section class="card" aria-label="Interaktív görgőmodell">
+      <div class="viewer-area" id="viewer-area">
+        <canvas id="scene" aria-label="Forgatható, nagyítható 3D görgő"></canvas>
+        <div class="loading" id="loading" role="status">A 3D modell betöltése…</div>
+        <button class="ar-button" id="ar-button" type="button">Megtekintés AR-ben</button>
+      </div>
+    </section>
+    <aside class="card side" aria-label="Görgő konfigurálása">
+      <h2>Konfiguráció</h2>
+      <p class="sub">Válaszd ki a kívánt kivitelt; a 3D megjelenítés automatikusan frissül.</p>
+      <div class="field">
+        <label for="hossz">Palásthossz (L)</label>
+        <select id="hossz">
+          <option value="300" selected>300 mm</option>
+          <option value="500">500 mm</option>
+          <option value="800">800 mm</option>
+          <option value="1000">1000 mm</option>
+          <option value="1500">1500 mm</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Palást anyaga</label>
+        <div class="segmented" role="group" aria-label="Palást anyaga">
+          <button type="button" id="steel" aria-pressed="true">Acél</button>
+          <button type="button" id="pvc" aria-pressed="false">PVC</button>
+        </div>
+      </div>
+      <div class="summary" aria-live="polite">
+        <p class="summary-title">VÁLASZTOTT KONFIGURÁCIÓ</p>
+        <strong id="summary-name">300 mm · Acél</strong>
+        <p>A palásthossz és az anyag megjelenése a kiválasztott beállításnak megfelelően változik.</p>
+      </div>
+      <p class="footnote">A 3D nézet szemléltető jellegű; a végleges műszaki adatokat a katalógus tartalmazza.</p>
+    </aside>
+  </div>
+  <model-viewer id="v8-ar-source" class="ar-source" src="./MOLTECH_3800_LIGHT_AR_v8_HATSO_JAVITAS.glb" alt="SERIES 3800 LIGHT – V8 bemutatómodell" ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" loading="eager" camera-controls></model-viewer>
+</main>
+<script>
+  // Directly open the verified V8 in mobile AR; fall back to its working page.
+  document.getElementById("ar-button").addEventListener("click", () => {
+    const viewer = document.getElementById("v8-ar-source");
+    if (viewer && viewer.canActivateAR && typeof viewer.activateAR === "function") {
+      viewer.activateAR().catch(() => { window.location.href = "./index.html"; });
+    } else {
+      window.location.href = "./index.html";
+    }
+  });
+</script>
+<script type="module">
+  import * as THREE from 'three';
+  import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+  const SOURCE = './MOLTECH_3800_LIGHT_AR_v8_HATSO_JAVITAS.glb';
+  // A V8 két végződése között a rekonstruált, egyenes palást csatlakozási
+  // síkjai közel -0.110 m és +0.130 m. Csak ezt a középső szakaszt méretezzük.
+  const BASE_TUBE_M = 0.240;
+  const TUBE_CENTER_Z = 0.010;
+  const RADIUS_M = 0.028944;
+  let lengthMm = 300;
+  let materialChoice = 'steel';
+  let ready = false;
+  let driveEnd, otherEnd, tube;
+
+  const canvas = document.getElementById('scene');
+  const area = document.getElementById('viewer-area');
+  const loading = document.getElementById('loading');
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.35;
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(36, 1, 0.005, 30);
+  const controls = new OrbitControls(camera, canvas);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.enablePan = false;
+  controls.minDistance = 0.12;
+  controls.maxDistance = 6;
+  controls.target.set(0,0,0);
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xa7b6c2, 2.3));
+  const key = new THREE.DirectionalLight(0xffffff, 3.1);
+  key.position.set(-2,3,5);
+  scene.add(key);
+  const fill = new THREE.DirectionalLight(0xffffff, 1.3);
+  fill.position.set(2,1,-4);
+  scene.add(fill);
+
+  const assembly = new THREE.Group();
+  // A STEP/GLB eredeti tengelye Z; vízszintes, bal oldalt hajtásos nézetet adunk.
+  assembly.rotation.y = Math.PI / 2;
+  scene.add(assembly);
+  driveEnd = new THREE.Group();
+  otherEnd = new THREE.Group();
+  assembly.add(driveEnd, otherEnd);
+
+  const steelMaterial = new THREE.MeshStandardMaterial({
+    name:'Konfigurator - acel palast', color:0xb8bec3,
+    metalness:0.76, roughness:0.31, side:THREE.DoubleSide
+  });
+  const pvcMaterial = new THREE.MeshStandardMaterial({
+    name:'Konfigurator - PVC palast', color:0x168ad7,
+    metalness:0.02, roughness:0.72, side:THREE.DoubleSide
+  });
+
+  function sizeRenderer() {
+    const w=Math.max(1,area.clientWidth);
+    const h=Math.max(1,area.clientHeight);
+    renderer.setSize(w,h,false);
+    camera.aspect=w/h;
+    camera.updateProjectionMatrix();
+  }
+
+  function focusDriveEnd() {
+    const fullM=(lengthMm/1000)+0.060;
+    const distance=Math.max(0.61, fullM*1.50);
+    camera.position.set(-0.70*distance, 0.33*distance, 0.78*distance);
+    controls.target.set(0,0,0);
+    controls.update();
+  }
+
+  // Face-alapú, de a geometriát nem átrajzoló szétválasztás: a V8 eredeti
+  // háromszögeit osztjuk a hajtásoldali és a másik végi alkatrészek közé.
+  // Az alkatrész-geometriát nem nyújtjuk meg; csak a két vég távolsága változik.
+  function selectSideGeometry(geometry, side) {
+    const converted = Boolean(geometry.index);
+    const src = converted ? geometry.toNonIndexed() : geometry;
+    const p = src.getAttribute('position');
+    const chosen=[];
+    for(let i=0;i<p.count;i+=3) {
+      const z=(p.getZ(i)+p.getZ(i+1)+p.getZ(i+2))/3;
+      if ((side==='drive' && z<0) || (side==='other' && z>=0)) {
+        chosen.push(i,i+1,i+2);
+      }
+    }
+    if (!chosen.length) {
+      if(converted) src.dispose();
+      return null;
+    }
+    const result = new THREE.BufferGeometry();
+    for (const [name, attribute] of Object.entries(src.attributes)) {
+      const n=attribute.itemSize;
+      const data=new Float32Array(chosen.length*n);
+      let at=0;
+      for(const vertex of chosen){
+        for(let component=0;component<n;component++){
+          data[at++]=attribute.getComponent(vertex,component);
+        }
+      }
+      result.setAttribute(name,new THREE.BufferAttribute(data,n));
+    }
+    result.computeBoundingBox();
+    result.computeBoundingSphere();
+    if(converted) src.dispose();
+    return result;
+  }
+
+  function makeEndPieces(original) {
+    original.traverse(object => {
+      if (!object.isMesh) return;
+      // Az eredeti zárt palást helyett parametrikus zárt hengert használunk;
+      // az eredeti CAD-ből származó részletes végződéseket változatlanul hagyjuk.
+      if (object.name === 'Palast__zart_belso_test') return;
+      for(const [side, group] of [['drive', driveEnd], ['other', otherEnd]]) {
+        const geometry=selectSideGeometry(object.geometry,side);
+        if(!geometry) continue;
+        const material=Array.isArray(object.material)
+          ? object.material.map(m=>m.clone()) : object.material.clone();
+        const child=new THREE.Mesh(geometry,material);
+        child.name=object.name+'_'+side;
+        if(Array.isArray(child.material)) child.material.forEach(m=>m.side=THREE.DoubleSide);
+        else child.material.side=THREE.DoubleSide;
+        child.frustumCulled=false;
+        group.add(child);
+      }
+    });
+
+    // Teljesen zárt, nem átlátszó palást; a csak a középső szakasz skálázódik.
+    const geometry=new THREE.CylinderGeometry(RADIUS_M,RADIUS_M,BASE_TUBE_M,128,1,false);
+    tube=new THREE.Mesh(geometry,steelMaterial);
+    tube.name='Konfiguralhato_palast';
+    tube.rotation.x=Math.PI/2;
+    tube.position.z=TUBE_CENTER_Z;
+    assembly.add(tube);
+  }
+
+  function updateConfiguration(resetView=false) {
+    document.getElementById('summary-name').textContent=lengthMm+' mm · '+(materialChoice==='steel'?'Acél':'PVC');
+    document.getElementById('steel').setAttribute('aria-pressed',String(materialChoice==='steel'));
+    document.getElementById('pvc').setAttribute('aria-pressed',String(materialChoice==='pvc'));
+    if(!ready) return;
+    const newTubeLength=lengthMm/1000;
+    const extra=newTubeLength-BASE_TUBE_M;
+    driveEnd.position.z=-extra/2;
+    otherEnd.position.z=extra/2;
+    tube.scale.y=newTubeLength/BASE_TUBE_M;
+    tube.material=(materialChoice==='steel'?steelMaterial:pvcMaterial);
+    if(resetView) focusDriveEnd();
+  }
+
+  document.getElementById('hossz').addEventListener('change',e=>{
+    lengthMm=Number(e.target.value);
+    updateConfiguration(true);
+  });
+  document.getElementById('steel').addEventListener('click',()=>{
+    materialChoice='steel';updateConfiguration();
+  });
+  document.getElementById('pvc').addEventListener('click',()=>{
+    materialChoice='pvc';updateConfiguration();
+  });
+
+  sizeRenderer();
+  if(window.ResizeObserver) new ResizeObserver(sizeRenderer).observe(area);
+  else window.addEventListener('resize',sizeRenderer);
+
+  const loader=new GLTFLoader();
+  loader.load(SOURCE, gltf=>{
+    try {
+      makeEndPieces(gltf.scene);
+      ready=true;
+      updateConfiguration(true);
+      loading.hidden=true;
+    } catch(error) {
+      loading.classList.add('err');
+      loading.textContent='A konfigurátor nem tudta feldolgozni a V8-at: '+error.message;
+      console.error(error);
+    }
+  },undefined,error=>{
+    loading.classList.add('err');
+    loading.textContent='A V8-as GLB nem tölthető be. Ellenőrizd, hogy a konfigurator.html mellett a GitHubon megtalálható-e a MOLTECH_3800_LIGHT_AR_v8_HATSO_JAVITAS.glb fájl.';
+    console.error(error);
+  });
+
+  function animate(){
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene,camera);
+  }
+  animate();
+</script>
+</body>
+</html>
