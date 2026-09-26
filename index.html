@@ -1,1 +1,147 @@
-<!doctype html><html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MOLTECH | 3D görgő</title><script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js"></script><style>*{box-sizing:border-box}body{margin:0;background:#f3f5f7;font:16px Arial,sans-serif;color:#17212b}.wrap{max-width:1100px;margin:32px auto;padding:0 18px}.head{display:flex;justify-content:space-between;align-items:center;gap:15px}h1{font-size:clamp(24px,4vw,38px);margin:22px 0 8px}.muted{color:#65727d}.panel{background:white;border-radius:16px;overflow:hidden;box-shadow:0 6px 28px #1b27331a}model-viewer{display:block;width:100%;height:min(65vh,620px);min-height:350px;background:radial-gradient(circle,#fff 10%,#e9edf0 100%)}button{background:#163b60;color:#fff;border:0;border-radius:9px;padding:13px 18px;font-weight:bold;cursor:pointer}.ar{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);white-space:nowrap}.foot{padding:20px 24px}.small{font-size:13px}.tag{font-size:12px;letter-spacing:2px;font-weight:bold;color:#55718a}</style></head><body><main class="wrap"><header class="head"><strong>MOLTECH</strong><span class="tag">3D PRODUCT VIEWER</span></header><h1>Ipari görgő – interaktív 3D modell</h1><p class="muted">Forgasd el, nagyíts rá, és kompatibilis mobilon nézd meg kiterjesztett valóságban.</p><section class="panel"><model-viewer src="./MOLTECH_gorgo_AR_JAVITOTT.glb" alt="MOLTECH ipari görgő háromdimenziós modellje" camera-controls touch-action="pan-y" auto-rotate shadow-intensity="0.5" exposure="1" ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" interaction-prompt="auto"><button class="ar" slot="ar-button">Megtekintés AR-ben</button></model-viewer><div class="foot"><strong>Görgő – bemutatómodell</strong><p class="muted small">A feltöltött STEP modellből konvertált 3D változat. A weboldalon megjelenő színek demonstrációs jellegűek. A mobilos AR működése eszköz- és böngészőfüggő.</p></div></section></main></body></html>
+
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>SERIES 3800 LIGHT | Interaktív 3D modell</title>
+
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js"></script>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:#f3f5f7;
+  font:16px Arial,sans-serif;
+  color:#17212b;
+}
+
+.wrap{
+  max-width:1100px;
+  margin:32px auto;
+  padding:0 18px;
+}
+
+h1{
+  font-size:clamp(26px,4vw,38px);
+  margin:0 0 10px;
+  font-weight:800;
+  letter-spacing:.3px;
+}
+
+.muted{
+  color:#65727d;
+}
+
+.intro{
+  margin:0 0 22px;
+  line-height:1.6;
+}
+
+.panel{
+  background:white;
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 6px 28px #1b27331a;
+}
+
+model-viewer{
+  display:block;
+  width:100%;
+  height:min(65vh,620px);
+  min-height:350px;
+  background:radial-gradient(circle,#fff 10%,#e9edf0 100%);
+}
+
+button{
+  background:#1265a4;
+  color:#fff;
+  border:0;
+  border-radius:9px;
+  padding:13px 18px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.ar{
+  position:absolute;
+  bottom:18px;
+  left:50%;
+  transform:translateX(-50%);
+  white-space:nowrap;
+}
+
+.foot{
+  padding:20px 24px;
+  border-top:1px solid #edf0f2;
+}
+
+.foot strong{
+  font-size:16px;
+}
+
+.foot p{
+  margin:9px 0 0;
+  line-height:1.6;
+}
+
+.small{
+  font-size:13px;
+}
+</style>
+</head>
+
+<body>
+
+<main class="wrap">
+
+  <h1>SERIES 3800 LIGHT</h1>
+
+  <p class="muted intro">
+    Forgasd el, nagyíts rá, és kompatibilis mobilon nézd meg
+    kiterjesztett valóságban.
+  </p>
+
+  <section class="panel">
+
+    <model-viewer
+      src="./MOLTECH_gorgo_AR_JAVITOTT.glb"
+      alt="Series 3800 Light görgő háromdimenziós modellje"
+      camera-controls
+      touch-action="pan-y"
+      auto-rotate
+      shadow-intensity="0.5"
+      exposure="1"
+      ar
+      ar-modes="webxr scene-viewer quick-look"
+      ar-scale="fixed"
+      interaction-prompt="auto">
+
+      <button class="ar" slot="ar-button">
+        Megtekintés AR-ben
+      </button>
+
+    </model-viewer>
+
+    <div class="foot">
+
+      <strong>SERIES 3800 LIGHT – 3D bemutatómodell</strong>
+
+      <p class="muted small">
+        A Series 3800 Light hajtott, frikciós működésű görgő
+        közepes súlyú termékek szállításához és torlasztásához.
+        Műanyag frikciós hajtáselemei kíméletes termékmozgatást
+        tesznek lehetővé. A 3D modell szemléltető jellegű.
+      </p>
+
+    </div>
+
+  </section>
+
+</main>
+
+</body>
+</html>
